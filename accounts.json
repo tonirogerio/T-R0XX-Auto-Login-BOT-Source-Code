@@ -1,22 +1,23 @@
 {
     "accounts": [
         {
-            "login": "logintest1",
-            "password": "123456789",
+            "login": "account1",
+            "password": "123456",
             "position": "Center",
             "server": "Giant Sky Medal"
         },
         {
-            "login": "logintest2",
-            "password": "123456789",
+            "login": "account2",
+            "password": "123456",
             "position": "Center",
             "server": "Light in the Darkness"
         },
         {
-            "login": "logintest3",
-            "password": "123456789",
+            "login": "account3",
+            "password": "123456",
             "position": "Center",
             "server": "Blue Ice"
         }
     ]
+
 }
