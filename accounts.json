@@ -1,0 +1,26 @@
+{
+    "accounts": [
+        {
+            "login": "account1",
+            "password": "123456",
+            "position": "Center",
+            "server": "Giant Sky Medal",
+			"selected": true
+        },
+        {
+            "login": "account2",
+            "password": "123456",
+            "position": "Center",
+            "server": "Light in the Darkness",
+			"selected": true
+        },
+        {
+            "login": "account3",
+            "password": "123456",
+            "position": "Center",
+            "server": "Blue Ice",
+			"selected": true
+        }
+    ]
+
+}
