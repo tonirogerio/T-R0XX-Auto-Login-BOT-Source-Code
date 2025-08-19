@@ -67,32 +67,33 @@ class AccountDialog(QDialog):
                             color: #d4d4d4; /* Change text color */
                         }"""
 
-        self.server_list = ["Light in the Darkness", "All Stars", "Tiger Fish", "Giant Sky Medal", "Wild Wave(EE)", "Blue Ice"]
+        self.server_list = ["Light in the Darkness", "All Stars", "Tiger Fish", "Giant Sky Medal", "Wild Wave(EE)",
+                            "Blue Ice", "White Horse [NEW]"]
         self.pos = ["Left", "Center", "Right"]
-        
+
         # Main layout
         layout = QVBoxLayout()
         self.setLayout(layout)
-        
+
         # Tabela de contas
         self.table = QTableWidget(0, 6)  # 0 linhas, 6 colunas (Select, ID, Login, Senha, Posição, Server)
         self.table.setHorizontalHeaderLabels(["Select", "ID", "Login", "Password", "Position", "Server"])
-        
+
         # Define o modo de redimensionamento para cada coluna
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Fixed)  # Checkbox
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Fixed)  # ID
         for i in range(2, 6):  # Demais colunas
             self.table.horizontalHeader().setSectionResizeMode(i, QHeaderView.ResizeMode.Stretch)
-        
+
         # Define larguras fixas para checkbox e ID
         self.table.setColumnWidth(0, 60)  # Checkbox
         self.table.setColumnWidth(1, 40)  # ID
-        
+
         layout.addWidget(self.table)
-        
+
         # Form para adicionar nova conta
         form_layout = QFormLayout()
-        
+
         self.login_input = QLineEdit()
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.EchoMode.Password)
@@ -100,35 +101,35 @@ class AccountDialog(QDialog):
         self.position_select.addItems(self.pos)
         self.server_select = QComboBox()
         self.server_select.addItems(self.server_list)
-        
+
         form_layout.addRow("Login:", self.login_input)
         form_layout.addRow("Password:", self.password_input)
         form_layout.addRow("Position:", self.position_select)
         form_layout.addRow("Server:", self.server_select)
-        
+
         layout.addLayout(form_layout)
-        
+
         # Botões
         button_layout = QHBoxLayout()
-        
+
         self.add_button = QPushButton("Add Account")
         self.add_button.setStyleSheet(self.button_style)
         self.add_button.clicked.connect(self.add_account)
-        
+
         self.remove_button = QPushButton("Remove Account")
         self.remove_button.setStyleSheet(self.button_style)
         self.remove_button.clicked.connect(self.remove_account)
-        
+
         self.save_button = QPushButton("Save")
         self.save_button.setStyleSheet(self.button_style)
         self.save_button.clicked.connect(self.accept)
-        
+
         button_layout.addWidget(self.add_button)
         button_layout.addWidget(self.remove_button)
         button_layout.addWidget(self.save_button)
-        
+
         layout.addLayout(button_layout)
-        
+
         # Load accounts existentes
         self.accounts = []
         self.load_accounts()
@@ -154,35 +155,35 @@ class AccountDialog(QDialog):
         except Exception as e:
             print(f"Erro ao salvar contas: {str(e)}")
             return False
-    
+
     def update_table(self):
         # Disconnect the signal temporarily to avoid triggers during update
         try:
             self.table.cellChanged.disconnect()
         except:
             pass
-        
+
         self.table.setRowCount(0)
         for i, account in enumerate(self.accounts):
             self.table.insertRow(i)
-            
+
             # Adiciona checkbox
             checkbox = QTableWidgetItem()
-            checkbox.setText("Log?") 
+            checkbox.setText("Log?")
 
             checkbox.setFlags(Qt.ItemFlag.ItemIsUserCheckable | Qt.ItemFlag.ItemIsEnabled)
             checkbox.setCheckState(Qt.CheckState.Checked if account.get("selected", False) else Qt.CheckState.Unchecked)
             self.table.setItem(i, 0, checkbox)
-            
-            self.table.setItem(i, 1, QTableWidgetItem(str(i+1)))
+
+            self.table.setItem(i, 1, QTableWidgetItem(str(i + 1)))
             self.table.setItem(i, 2, QTableWidgetItem(account["login"]))
             self.table.setItem(i, 3, QTableWidgetItem("*" * len(account["password"])))
             self.table.setItem(i, 4, QTableWidgetItem(str(account["position"])))
             self.table.setItem(i, 5, QTableWidgetItem(str(account["server"])))
-        
+
         # Reconnect the signal after update
         self.table.cellChanged.connect(self.on_cell_changed)
-            
+
     def on_cell_changed(self, row, column):
         """Update data when cell is edited"""
         if 0 <= row < len(self.accounts):
@@ -190,15 +191,15 @@ class AccountDialog(QDialog):
                 item = self.table.item(row, column)
                 if item is None:
                     return
-                
+
                 if column == 0:  # Checkbox
                     self.accounts[row]["selected"] = item.checkState() == Qt.CheckState.Checked
                     if self.save_accounts():
-                        print(f"Account {row+1} selection state updated successfully")
+                        print(f"Account {row + 1} selection state updated successfully")
                     return
-                    
+
                 new_value = item.text().strip()
-                
+
                 if column == 2:  # Login
                     self.accounts[row]["login"] = new_value
                 elif column == 4:  # Posição
@@ -208,8 +209,8 @@ class AccountDialog(QDialog):
                     else:
                         # Restaurar valor anterior se inválido
                         item.setText(self.accounts[row]["position"])
-                        QMessageBox.warning(self, "Invalid Value", 
-                                        f"Position must be one of the options: {', '.join(self.pos)}")
+                        QMessageBox.warning(self, "Invalid Value",
+                                            f"Position must be one of the options: {', '.join(self.pos)}")
                         return
                 elif column == 5:  # Server
                     # Validar se o servidor é válido
@@ -218,16 +219,16 @@ class AccountDialog(QDialog):
                     else:
                         # Restaurar valor anterior se inválido
                         item.setText(self.accounts[row]["server"])
-                        QMessageBox.warning(self, "Invalid Value", 
-                                        f"Server must be one of the options: {', '.join(self.server_list)}")
+                        QMessageBox.warning(self, "Invalid Value",
+                                            f"Server must be one of the options: {', '.join(self.server_list)}")
                         return
-                
+
                 # Save only if the change was valid
                 if self.save_accounts():
-                    print(f"Account {row+1} updated and saved successfully")
+                    print(f"Account {row + 1} updated and saved successfully")
                 else:
                     QMessageBox.warning(self, "Error", "Error saving changes!")
-                    
+
             except Exception as e:
                 print(f"Error editing cell: {e}")
                 QMessageBox.warning(self, "Error", f"Error processing change: {str(e)}")
@@ -237,11 +238,11 @@ class AccountDialog(QDialog):
         password = self.password_input.text().strip()
         position = self.position_select.currentText()
         server = self.server_select.currentText()
-        
+
         if not login or not password:
             QMessageBox.warning(self, "Warning", "Login and password are required!")
             return
-        
+
         self.accounts.append({
             "login": login,
             "password": password,
@@ -249,30 +250,30 @@ class AccountDialog(QDialog):
             "server": server,
             "selected": False
         })
-        
+
         # Clear fields
         self.login_input.clear()
         self.password_input.clear()
         self.position_select.currentText()
         self.server_select.currentText()
-        
+
         # Update table
         self.update_table()
-        
+
         # Auto-save
         self.save_accounts()
-    
+
     def remove_account(self):
         selected_rows = self.table.selectedItems()
         if not selected_rows:
             QMessageBox.warning(self, "Warning", "Select an account to remove!")
             return
-        
+
         row = selected_rows[0].row()
         if 0 <= row < len(self.accounts):
             self.accounts.pop(row)
             self.update_table()
-            
+
             # Auto-save
             self.save_accounts()
 
@@ -319,11 +320,11 @@ class AutoLoginWindow(QMainWindow):
         # Central widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
-        
+
         # Main layout
         layout = QVBoxLayout()
         central_widget.setLayout(layout)
-        
+
         # Form layout for settings
         form_layout = QFormLayout()
 
@@ -378,19 +379,19 @@ class AutoLoginWindow(QMainWindow):
         form_layout.addWidget(client_folder_title)
         form_layout.addRow(path_layout)
         form_layout.addRow(folder_layout)
-        #form_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
+        # form_layout.addItem(QSpacerItem(20, 20, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum))
         form_layout.addRow(buttons_layout)
-        
+
         # Add form layout to main layout
         layout.addLayout(form_layout)
-        
+
         # List to store initial PIDs
         self.initial_pids = self.get_client_pids()
-        
+
         # Load accounts
         self.accounts = []
         self.load_accounts()
-        
+
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self._start_pos = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
@@ -405,7 +406,7 @@ class AutoLoginWindow(QMainWindow):
         if event.button() == Qt.MouseButton.LeftButton:
             self._start_pos = None
             event.accept()
-    
+
     def get_client_pids(self):
         client_pids = []
         for proc in psutil.process_iter(['pid', 'name']):
@@ -415,7 +416,7 @@ class AutoLoginWindow(QMainWindow):
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
         return client_pids
-    
+
     def save_pids_to_json(self, pids):
         data = {"client_pids": pids}
         json_path = os.path.join(os.path.dirname(__file__), "client_pids.json")
@@ -472,7 +473,6 @@ class AutoLoginWindow(QMainWindow):
         else:
             self.log_message("All accounts logged in successfully.")
 
-
     def check_failed_logins(self, pids):
         print("Checking accounts that may have failed to log in...")
         # Here you can implement additional logic to check
@@ -489,12 +489,13 @@ class AutoLoginWindow(QMainWindow):
                 "password": (613, 425),
                 "passError": (515, 333),
                 "ok_button": (518, 495),
-                "server_1": (344,346),
-                "server_2": (346,327),
-                "server_3": (339,305),
-                "server_4": (348,283),
-                "server_5": (349,267),
-                "server_6": (353, 245),
+                "server_1": (339,365),
+                "server_2": (344,345),
+                "server_3": (354,323),
+                "server_4": (360,302),
+                "server_5": (342,283),
+                "server_6": (342,264),
+                "server_7": (339,245),
                 "ok_server": (557, 531),
                 "pos_1": (144, 453),
                 "pos_2": (465, 466),
@@ -507,7 +508,7 @@ class AutoLoginWindow(QMainWindow):
             try:
                 import win32gui
                 import win32process
-                
+
                 # Tenta FindWindowEx percorrendo todas as janelas top-level
                 try:
                     hwnd = win32gui.GetTopWindow(0)
@@ -522,7 +523,7 @@ class AutoLoginWindow(QMainWindow):
                         hwnd = win32gui.GetWindow(hwnd, win32con.GW_HWNDNEXT)
                 except Exception:
                     pass
-                    
+
             except Exception as e:
                 print(f"Erro no método alternativo para PID {self.pid}: {str(e)}")
 
@@ -532,14 +533,14 @@ class AutoLoginWindow(QMainWindow):
                 if not psutil.pid_exists(self.pid):
                     print(f"Processo {self.pid} não existe mais")
                     return
-                    
+
                 # Aguarda um pouco antes de tentar encontrar a janela
                 time.sleep(2)
-                
+
                 # Obtém o handle da janela pelo PID com tratamento de erro robusto
                 import win32gui
                 import win32process
-                
+
                 def enum_windows_callback(hwnd, extra):
                     try:
                         if win32gui.IsWindowVisible(hwnd):
@@ -550,7 +551,7 @@ class AutoLoginWindow(QMainWindow):
                     except Exception:
                         pass  # Ignora erros individuais de janelas
                     return True
-                
+
                 # Tenta enumerar as janelas com tratamento de erro
                 try:
                     win32gui.EnumWindows(enum_windows_callback, None)
@@ -558,7 +559,7 @@ class AutoLoginWindow(QMainWindow):
                     print(f"Erro ao enumerar janelas para PID {self.pid}: {str(e)}")
                     # Tenta uma abordagem alternativa usando FindWindow
                     self.find_window_alternative()
-                
+
                 if self.hwnd:
                     success = self.perform_account_login()
                     if success:
@@ -567,7 +568,7 @@ class AutoLoginWindow(QMainWindow):
                         print(f"Falha ao fazer login para {self.account['login']}")
                 else:
                     print(f"Não foi possível encontrar a janela para o PID: {self.pid}")
-                        
+
             except Exception as e:
                 print(f"Erro ao realizar login para o PID {self.pid}: {str(e)}")
 
@@ -576,10 +577,10 @@ class AutoLoginWindow(QMainWindow):
             try:
                 import win32gui
                 import win32process
-                
+
                 # Lista de possíveis títulos de janela do client
                 possible_titles = ["", "Client", "client", "Game", "ver.6139", "Talisman Online"]
-                
+
                 for title in possible_titles:
                     try:
                         hwnd = win32gui.FindWindow(None, title)
@@ -590,7 +591,7 @@ class AutoLoginWindow(QMainWindow):
                                 return
                     except Exception:
                         continue
-                        
+
                 # Se não encontrou por título, tenta FindWindowEx
                 try:
                     hwnd = win32gui.GetTopWindow(0)
@@ -605,7 +606,7 @@ class AutoLoginWindow(QMainWindow):
                         hwnd = win32gui.GetWindow(hwnd, win32con.GW_HWNDNEXT)
                 except Exception:
                     pass
-                    
+
             except Exception as e:
                 print(f"Erro no método alternativo para PID {self.pid}: {str(e)}")
 
@@ -615,7 +616,7 @@ class AutoLoginWindow(QMainWindow):
                 if not win32gui.IsWindow(self.hwnd):
                     print(f"Janela não existe mais para {self.account['login']}")
                     return False
-                    
+
                 # Clica na posição da conta
                 mouse.left(self.hwnd, self.coords['account'][0], self.coords['account'][1])
                 time.sleep(1)
@@ -634,7 +635,7 @@ class AutoLoginWindow(QMainWindow):
                 time.sleep(0.5)
                 keyboard.write(self.hwnd, self.account["password"])
                 time.sleep(1)
-                
+
                 # Confirma login
                 mouse.left(self.hwnd, self.coords['ok_button'][0], self.coords['ok_button'][1])
                 time.sleep(2)  # Aumentado o tempo de espera
@@ -662,7 +663,8 @@ class AutoLoginWindow(QMainWindow):
                     "Tiger Fish": 'server_3',
                     "Giant Sky Medal": 'server_4',
                     "Wild Wave(EE)": 'server_5',
-                    "Blue Ice": 'server_6'
+                    "Blue Ice": 'server_6',
+                    "White Horse [NEW]": 'server_7'
                 }
 
                 if server in server_coords:
@@ -687,7 +689,7 @@ class AutoLoginWindow(QMainWindow):
 
                     time.sleep(1)
 
-               # Queue check - aguarda indefinidamente até sair da fila
+                # Queue check - aguarda indefinidamente até sair da fila
                 finder = ImageFinder(self.hwnd)
                 found = finder.find_image()
                 time.sleep(1)
@@ -701,7 +703,7 @@ class AutoLoginWindow(QMainWindow):
                     print(f"Char {self.account['login']} saiu da fila.")
                 else:
                     print(f"Char {self.account['login']} sem fila.")
-                
+
                 # Seleciona posição do personagem
                 position_coords = {
                     "Left": 'pos_1',
@@ -711,10 +713,11 @@ class AutoLoginWindow(QMainWindow):
 
                 # Se não tem fila, seleciona a posição e entra no jogo
                 if self.account["position"] in position_coords:
-                    mouse.left(self.hwnd, self.coords[position_coords[self.account["position"]]][0], self.coords[position_coords[self.account["position"]]][1])
+                    mouse.left(self.hwnd, self.coords[position_coords[self.account["position"]]][0],
+                               self.coords[position_coords[self.account["position"]]][1])
                 time.sleep(1)
 
-                 # Checa disconnect antes de entrar no jogo
+                # Checa disconnect antes de entrar no jogo
                 while True:
                     pointers = Pointers(self.pid)
                     login = pointers.check_login()
@@ -737,7 +740,7 @@ class AutoLoginWindow(QMainWindow):
                 char_name = pointers.get_char_name()
                 win32gui.SetWindowText(self.hwnd, char_name)
                 time.sleep(1)
-                
+
                 return True
 
             except Exception as e:
@@ -752,7 +755,8 @@ class AutoLoginWindow(QMainWindow):
         selected_accounts = [account for account in self.accounts if account.get('selected', False)]
 
         if not selected_accounts:
-            QMessageBox.warning(self, "Aviso", "Nenhuma conta selecionada para login. Por favor, selecione pelo menos uma conta.")
+            QMessageBox.warning(self, "Aviso",
+                                "Nenhuma conta selecionada para login. Por favor, selecione pelo menos uma conta.")
             return
 
         # Garante que temos PIDs suficientes para as contas selecionadas
@@ -774,51 +778,53 @@ class AutoLoginWindow(QMainWindow):
 
         # Não bloqueia a thread principal
         # As threads de login continuarão executando em segundo plano
-    
+
     def start_auto_login(self):
         client_path = self.client_path.text()
-        
+
         # Verifica se o arquivo existe
         if not os.path.exists(client_path):
             QMessageBox.critical(self, "Erro", f"Arquivo não encontrado: {client_path}")
             return
-        
+
         # IMPORTANTE: Recarrega as contas antes de iniciar
         print("Recarregando contas do arquivo...")
         self.load_accounts()
 
         # Limpa os PIDs salvos anteriormente para evitar problemas com janelas fechadas
         self.save_pids_to_json([])
-        
+
         if len(self.accounts) == 0:
-            QMessageBox.warning(self, "Aviso", "Não há contas cadastradas. Por favor, cadastre pelo menos uma conta antes de iniciar.")
+            QMessageBox.warning(self, "Aviso",
+                                "Não há contas cadastradas. Por favor, cadastre pelo menos uma conta antes de iniciar.")
             return
 
         # Verifica se há contas selecionadas
         selected_accounts = [account for account in self.accounts if account.get('selected', False)]
         if not selected_accounts:
-            QMessageBox.warning(self, "Aviso", "Nenhuma conta selecionada para login. Por favor, selecione pelo menos uma conta.")
+            QMessageBox.warning(self, "Aviso",
+                                "Nenhuma conta selecionada para login. Por favor, selecione pelo menos uma conta.")
             return
-        
-        #print(f"Contas carregadas: {len(self.accounts)}")
+
+        # print(f"Contas carregadas: {len(self.accounts)}")
         # for i, acc in enumerate(self.accounts):
-            #print(f"  {i+1}: {acc['login']} - {acc['position']} - {acc['server']}")
-        
+        # print(f"  {i+1}: {acc['login']} - {acc['position']} - {acc['server']}")
+
         try:
             # Obtém o diretório do client.bat
             client_dir = os.path.dirname(client_path)
             # Muda para o diretório do client.bat
             os.chdir(client_dir)
-            
+
             # Inicia um cliente para cada conta selecionada
             num_selected_accounts = len(selected_accounts)
             print(f"Iniciando {num_selected_accounts} clientes para as contas selecionadas")
-            
+
             # Cria e inicia o thread do cliente
             self.client_thread = ClientThread(client_path, num_selected_accounts, self.initial_pids)
             self.client_thread.finished.connect(lambda pids: self.on_clients_started(pids))
             self.client_thread.start()
-            
+
         except Exception as e:
             QMessageBox.critical(self, "Erro", f"Erro ao executar os clientes: {str(e)}")
 
@@ -834,7 +840,7 @@ class AutoLoginWindow(QMainWindow):
 
 class ClientThread(QThread):
     finished = pyqtSignal(list)
-    
+
     def __init__(self, client_path, num_accounts, initial_pids):
         super().__init__()
         self.client_path = client_path
@@ -883,7 +889,6 @@ class ClientThread(QThread):
             self.finished.emit(new_pids)
         except Exception as e:
             print(f"Erro no thread: {str(e)}")
-
 
     def get_current_client_pids(self):
         """Obtém lista atual de PIDs do client.exe"""
